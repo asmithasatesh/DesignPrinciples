@@ -60,14 +60,15 @@ namespace Design_Principles
                 Console.WriteLine("Enter the Age: "+i.age);
                 Console.WriteLine("Enter the Basic Pay: "+i.basicPay);
                 Console.WriteLine("Enter the Deduction: "+i.Deduction);
+                //Liskov Substitution Principle
                 if(i.employeeType =="FullTime")
                 {
-                    FullTimeEmployee fullTimeEmployee = new FullTimeEmployee();
+                    CalculateFunction fullTimeEmployee = new FullTimeEmployee();
                     netPay = fullTimeEmployee.CalculateNetPay(i);
                 }
                 else
                 {
-                    PartTimeEmployee partTimeEmployee = new PartTimeEmployee();
+                    CalculateFunction partTimeEmployee = new PartTimeEmployee();
                     netPay = partTimeEmployee.CalculateNetPay(i);
                 }
 
@@ -94,7 +95,8 @@ namespace Design_Principles
 
     }
     //Calculate Netpay for Parttime Employee
-    public class PartTimeEmployee : CalculateFunction
+
+    public class PartTimeEmployee : FullTimeEmployee
     {
         public override decimal CalculateNetPay(SingleResponsibilityPrinciple employeeDetails)
         {
