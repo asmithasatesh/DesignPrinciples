@@ -12,13 +12,16 @@ namespace Design_Principles
         public int age { get; set; }
         public  decimal basicPay { get; set; }
         public  decimal Deduction { get; set; }
-        public SingleResponsibilityPrinciple(string employeeName, int age, decimal basicPay, decimal Deduction)
+        public string employeeType { get; set; }
+        public SingleResponsibilityPrinciple(string employeeName, int age, decimal basicPay, decimal Deduction,string employeeType)
         {
             this.employeeName = employeeName;
             this.age = age;
             this.basicPay = basicPay;
             this.Deduction = Deduction;
+            this.employeeType = employeeType;
         }
+        //Method to Get Employee Details
         public static List<SingleResponsibilityPrinciple> GetInput()
         {
             Console.WriteLine("Enter the number of Employees");
@@ -34,7 +37,9 @@ namespace Design_Principles
                 decimal basicPay = Convert.ToDecimal(Console.ReadLine());
                 Console.WriteLine("Enter the Deduction:");
                 decimal Deduction = Convert.ToDecimal(Console.ReadLine());
-                SingleResponsibilityPrinciple singleResponsibilityPrinciple = new SingleResponsibilityPrinciple(employeeName, age, basicPay, Deduction);
+                Console.WriteLine("Enter the Employee Type:");
+                string employeeType = Console.ReadLine();
+                SingleResponsibilityPrinciple singleResponsibilityPrinciple = new SingleResponsibilityPrinciple(employeeName, age, basicPay, Deduction,employeeType);
                 list.Add(singleResponsibilityPrinciple);
             }
             return list;
@@ -43,9 +48,11 @@ namespace Design_Principles
 
     public class DisplayEmployeeDetail
     {
+        //Display Employee Details
         public void Display()
         {
             List<SingleResponsibilityPrinciple> employeeDetails = SingleResponsibilityPrinciple.GetInput();
+            decimal netPay = 0;
             Console.WriteLine("\n--------------------- Display Employee Details ---------------------");
             foreach (var i in employeeDetails)
             {
@@ -53,17 +60,45 @@ namespace Design_Principles
                 Console.WriteLine("Enter the Age: "+i.age);
                 Console.WriteLine("Enter the Basic Pay: "+i.basicPay);
                 Console.WriteLine("Enter the Deduction: "+i.Deduction);
-                decimal netPay = CalculateFunction.CalculateNetPay(i);
+                if(i.employeeType =="FullTime")
+                {
+                    FullTimeEmployee fullTimeEmployee = new FullTimeEmployee();
+                    netPay = fullTimeEmployee.CalculateNetPay(i);
+                }
+                else
+                {
+                    PartTimeEmployee partTimeEmployee = new PartTimeEmployee();
+                    netPay = partTimeEmployee.CalculateNetPay(i);
+                }
+
                 Console.WriteLine("Enter the NetPay: " + netPay);
             }
 
         }
     }
-    public class CalculateFunction
+
+    //Open Closed Principle
+    public abstract class CalculateFunction
     {
-        public static decimal CalculateNetPay(SingleResponsibilityPrinciple employeeDetails)
+        //Calculate NetPay
+        public abstract decimal CalculateNetPay(SingleResponsibilityPrinciple employeeDetails);
+    }
+    //Calculate Netpay for fulltime Employee
+    public class FullTimeEmployee : CalculateFunction
+    {
+        public override decimal CalculateNetPay(SingleResponsibilityPrinciple employeeDetails)
         {
             decimal netPay = employeeDetails.basicPay - employeeDetails.Deduction;
+            return netPay;
+        }
+
+    }
+    //Calculate Netpay for Parttime Employee
+    public class PartTimeEmployee : CalculateFunction
+    {
+        public override decimal CalculateNetPay(SingleResponsibilityPrinciple employeeDetails)
+        {
+            decimal netPay = employeeDetails.basicPay - (employeeDetails.Deduction / 2);
             return netPay;
         }
     }
