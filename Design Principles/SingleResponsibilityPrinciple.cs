@@ -4,7 +4,15 @@ using System.Text;
 
 namespace Design_Principles
 {
-
+    //Interface Segregation Principle
+    interface TaxCalculator
+    {
+        public decimal CalculateIncomeTax(decimal basicPay);
+    }
+    interface specialAllowances
+    {
+        public decimal TravelandFoodAllowance(string employeeType);
+    }
     public class SingleResponsibilityPrinciple
     {
         public static List<SingleResponsibilityPrinciple> list = new List<SingleResponsibilityPrinciple>();
@@ -60,8 +68,9 @@ namespace Design_Principles
                 Console.WriteLine("Enter the Age: "+i.age);
                 Console.WriteLine("Enter the Basic Pay: "+i.basicPay);
                 Console.WriteLine("Enter the Deduction: "+i.Deduction);
+                Console.WriteLine("Enter the Employee Type: " + i.employeeType);
                 //Liskov Substitution Principle
-                if(i.employeeType =="FullTime")
+                if (i.employeeType =="FullTime")
                 {
                     CalculateFunction fullTimeEmployee = new FullTimeEmployee();
                     netPay = fullTimeEmployee.CalculateNetPay(i);
@@ -78,6 +87,19 @@ namespace Design_Principles
         }
     }
 
+    //Interface Segregation Principle
+    public class TaxCalculate: TaxCalculator
+    {
+        public  decimal CalculateIncomeTax(decimal basicPay)
+        {
+            if(basicPay< 5000000)
+            {
+                return 0;
+            }
+            decimal incomeTax = (basicPay * 5 )/ 100 ;
+            return incomeTax;
+        }
+    }
     //Open Closed Principle
     public abstract class CalculateFunction
     {
@@ -85,11 +107,21 @@ namespace Design_Principles
         public abstract decimal CalculateNetPay(SingleResponsibilityPrinciple employeeDetails);
     }
     //Calculate Netpay for fulltime Employee
-    public class FullTimeEmployee : CalculateFunction
+    public class FullTimeEmployee : CalculateFunction,specialAllowances
     {
+        TaxCalculate TaxCalculate = new TaxCalculate();
+        public decimal TravelandFoodAllowance(string employeeType)
+        {
+            decimal allowances = 0;
+            if(employeeType== "FullTime")
+            {
+                allowances = 1000;
+            }
+            return allowances;
+        }
         public override decimal CalculateNetPay(SingleResponsibilityPrinciple employeeDetails)
         {
-            decimal netPay = employeeDetails.basicPay - employeeDetails.Deduction;
+            decimal netPay = employeeDetails.basicPay - employeeDetails.Deduction + TravelandFoodAllowance(employeeDetails.employeeType) - TaxCalculate.CalculateIncomeTax(employeeDetails.basicPay);
             return netPay;
         }
 
@@ -98,9 +130,10 @@ namespace Design_Principles
 
     public class PartTimeEmployee : FullTimeEmployee
     {
+        TaxCalculate TaxCalculate = new TaxCalculate();
         public override decimal CalculateNetPay(SingleResponsibilityPrinciple employeeDetails)
         {
-            decimal netPay = employeeDetails.basicPay - (employeeDetails.Deduction / 2);
+            decimal netPay = employeeDetails.basicPay - (employeeDetails.Deduction / 2) - TaxCalculate.CalculateIncomeTax(employeeDetails.basicPay);
             return netPay;
         }
     }
