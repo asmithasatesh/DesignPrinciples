@@ -83,9 +83,70 @@ namespace Design_Principles
 
                 Console.WriteLine("Enter the NetPay: " + netPay);
             }
+            //Create interface object for FullTime
+            DisplayEmployeeNames displayEmployeeNames = new PrintFullTime();
+            //Create object for Interface Manager
+            EmployeeTypeManager employeeTypeManager = new EmployeeTypeManager(displayEmployeeNames);
+            //Method
+            employeeTypeManager.Display(employeeDetails);
+            //Create interface object for Part Time
+            DisplayEmployeeNames displayEmployeeName = new PrintPartTime();
+            EmployeeTypeManager employeeTypeManagers = new EmployeeTypeManager(displayEmployeeName);
+            employeeTypeManagers.Display(employeeDetails);
 
         }
     }
+    public interface DisplayEmployeeNames
+    {
+        public void PrintName(List<SingleResponsibilityPrinciple> employeeDetails);
+    }
+
+    //Dependency Inversion
+    public class EmployeeTypeManager
+    {
+        //Create object for Interface
+        DisplayEmployeeNames displayEmployeeNames;
+        public EmployeeTypeManager(DisplayEmployeeNames displayEmployeeNames)
+        {
+            this.displayEmployeeNames = displayEmployeeNames;
+        }
+        //Call Interface Method
+        public void Display(List<SingleResponsibilityPrinciple> employeeDetails)
+        {
+            displayEmployeeNames.PrintName(employeeDetails);
+        }
+    }
+    //Implement Interface
+    public class PrintFullTime : DisplayEmployeeNames
+    {
+        public void PrintName(List<SingleResponsibilityPrinciple> employeeDetails)
+        {
+            Console.WriteLine("-- FullTime--");
+            foreach (var employee in employeeDetails)
+            {
+                if (employee.employeeType == "FullTime")
+                {
+                    Console.WriteLine("Employee Name : " + employee.employeeName);
+                }
+            }
+        }
+    }
+    
+    public class PrintPartTime : DisplayEmployeeNames
+    {
+        public void PrintName(List<SingleResponsibilityPrinciple> employeeDetails)
+        {
+            Console.WriteLine("-- PartTime--");
+            foreach (var employee in employeeDetails)
+            {
+                if (employee.employeeType != "FullTime")
+                {
+                    Console.WriteLine("Employee Name : " + employee.employeeName);
+                }
+            }
+        }
+    }
+
 
     //Interface Segregation Principle
     public class TaxCalculate: TaxCalculator
