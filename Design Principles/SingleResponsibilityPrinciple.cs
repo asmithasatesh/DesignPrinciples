@@ -5,29 +5,29 @@ using System.Text;
 namespace Design_Principles
 {
     //Interface Segregation Principle
-    interface TaxCalculator
+    interface ITaxCalculator
     {
         public decimal CalculateIncomeTax(decimal basicPay);
     }
-    interface specialAllowances
+    interface ISpecialAllowances
     {
         public decimal TravelandFoodAllowance(string employeeType);
     }
     public class SingleResponsibilityPrinciple
     {
         public static List<SingleResponsibilityPrinciple> list = new List<SingleResponsibilityPrinciple>();
-        public  string employeeName { get; set; }
-        public int age { get; set; }
-        public  decimal basicPay { get; set; }
+        public  string EmployeeName { get; set; }
+        public int Age { get; set; }
+        public  decimal BasicPay { get; set; }
         public  decimal Deduction { get; set; }
-        public string employeeType { get; set; }
+        public string EmployeeType { get; set; }
         public SingleResponsibilityPrinciple(string employeeName, int age, decimal basicPay, decimal Deduction,string employeeType)
         {
-            this.employeeName = employeeName;
-            this.age = age;
-            this.basicPay = basicPay;
+            this.EmployeeName = employeeName;
+            this.Age = age;
+            this.BasicPay = basicPay;
             this.Deduction = Deduction;
-            this.employeeType = employeeType;
+            this.EmployeeType = employeeType;
         }
         //Method to Get Employee Details
         public static List<SingleResponsibilityPrinciple> GetInput()
@@ -64,39 +64,40 @@ namespace Design_Principles
             Console.WriteLine("\n--------------------- Display Employee Details ---------------------");
             foreach (var i in employeeDetails)
             {
-                Console.WriteLine("\nEmployeeName: "+i.employeeName);
-                Console.WriteLine("Enter the Age: "+i.age);
-                Console.WriteLine("Enter the Basic Pay: "+i.basicPay);
+                Console.WriteLine("\nEmployeeName: "+i.EmployeeName);
+                Console.WriteLine("Enter the Age: "+i.Age);
+                Console.WriteLine("Enter the Basic Pay: "+i.BasicPay);
                 Console.WriteLine("Enter the Deduction: "+i.Deduction);
-                Console.WriteLine("Enter the Employee Type: " + i.employeeType);
+                Console.WriteLine("Enter the Employee Type: " + i.EmployeeType);
                 //Liskov Substitution Principle
-                if (i.employeeType =="FullTime")
+                if (i.EmployeeType =="FullTime")
                 {
                     CalculateFunction fullTimeEmployee = new FullTimeEmployee();
                     netPay = fullTimeEmployee.CalculateNetPay(i);
                 }
                 else
                 {
-                    CalculateFunction partTimeEmployee = new PartTimeEmployee();
+                    FullTimeEmployee partTimeEmployee = new PartTimeEmployee();
                     netPay = partTimeEmployee.CalculateNetPay(i);
                 }
 
                 Console.WriteLine("Enter the NetPay: " + netPay);
             }
             //Create interface object for FullTime
-            DisplayEmployeeNames displayEmployeeNames = new PrintFullTime();
+            IDisplayEmployeeNames displayEmployeeNames = new PrintFullTime();
             //Create object for Interface Manager
             EmployeeTypeManager employeeTypeManager = new EmployeeTypeManager(displayEmployeeNames);
             //Method
             employeeTypeManager.Display(employeeDetails);
+
             //Create interface object for Part Time
-            DisplayEmployeeNames displayEmployeeName = new PrintPartTime();
+            IDisplayEmployeeNames displayEmployeeName = new PrintPartTime();
             EmployeeTypeManager employeeTypeManagers = new EmployeeTypeManager(displayEmployeeName);
             employeeTypeManagers.Display(employeeDetails);
 
         }
     }
-    public interface DisplayEmployeeNames
+    public interface IDisplayEmployeeNames
     {
         public void PrintName(List<SingleResponsibilityPrinciple> employeeDetails);
     }
@@ -105,8 +106,8 @@ namespace Design_Principles
     public class EmployeeTypeManager
     {
         //Create object for Interface
-        DisplayEmployeeNames displayEmployeeNames;
-        public EmployeeTypeManager(DisplayEmployeeNames displayEmployeeNames)
+        private readonly IDisplayEmployeeNames displayEmployeeNames;
+        public EmployeeTypeManager(IDisplayEmployeeNames displayEmployeeNames)
         {
             this.displayEmployeeNames = displayEmployeeNames;
         }
@@ -117,39 +118,38 @@ namespace Design_Principles
         }
     }
     //Implement Interface
-    public class PrintFullTime : DisplayEmployeeNames
+    public class PrintFullTime : IDisplayEmployeeNames
     {
         public void PrintName(List<SingleResponsibilityPrinciple> employeeDetails)
         {
             Console.WriteLine("-- FullTime--");
             foreach (var employee in employeeDetails)
             {
-                if (employee.employeeType == "FullTime")
+                if (employee.EmployeeType == "FullTime")
                 {
-                    Console.WriteLine("Employee Name : " + employee.employeeName);
+                    Console.WriteLine("Employee Name : " + employee.EmployeeName);
                 }
             }
         }
     }
     
-    public class PrintPartTime : DisplayEmployeeNames
+    public class PrintPartTime : IDisplayEmployeeNames
     {
         public void PrintName(List<SingleResponsibilityPrinciple> employeeDetails)
         {
             Console.WriteLine("-- PartTime--");
             foreach (var employee in employeeDetails)
             {
-                if (employee.employeeType != "FullTime")
+                if (employee.EmployeeType != "FullTime")
                 {
-                    Console.WriteLine("Employee Name : " + employee.employeeName);
+                    Console.WriteLine("Employee Name : " + employee.EmployeeName);
                 }
             }
         }
     }
 
-
     //Interface Segregation Principle
-    public class TaxCalculate: TaxCalculator
+     class TaxCalculate: ITaxCalculator
     {
         public  decimal CalculateIncomeTax(decimal basicPay)
         {
@@ -167,10 +167,11 @@ namespace Design_Principles
         //Calculate NetPay
         public abstract decimal CalculateNetPay(SingleResponsibilityPrinciple employeeDetails);
     }
+
     //Calculate Netpay for fulltime Employee
-    public class FullTimeEmployee : CalculateFunction,specialAllowances
+    public class FullTimeEmployee : CalculateFunction,ISpecialAllowances
     {
-        TaxCalculate TaxCalculate = new TaxCalculate();
+        readonly TaxCalculate TaxCalculate = new TaxCalculate();
         public decimal TravelandFoodAllowance(string employeeType)
         {
             decimal allowances = 0;
@@ -182,19 +183,19 @@ namespace Design_Principles
         }
         public override decimal CalculateNetPay(SingleResponsibilityPrinciple employeeDetails)
         {
-            decimal netPay = employeeDetails.basicPay - employeeDetails.Deduction + TravelandFoodAllowance(employeeDetails.employeeType) - TaxCalculate.CalculateIncomeTax(employeeDetails.basicPay);
+            decimal netPay = employeeDetails.BasicPay - employeeDetails.Deduction + TravelandFoodAllowance(employeeDetails.EmployeeType) - TaxCalculate.CalculateIncomeTax(employeeDetails.BasicPay);
             return netPay;
         }
 
     }
-    //Calculate Netpay for Parttime Employee
 
+    //Calculate Netpay for Parttime Employee
     public class PartTimeEmployee : FullTimeEmployee
     {
         TaxCalculate TaxCalculate = new TaxCalculate();
         public override decimal CalculateNetPay(SingleResponsibilityPrinciple employeeDetails)
         {
-            decimal netPay = employeeDetails.basicPay - (employeeDetails.Deduction / 2) - TaxCalculate.CalculateIncomeTax(employeeDetails.basicPay);
+            decimal netPay = employeeDetails.BasicPay - (employeeDetails.Deduction / 2) - TaxCalculate.CalculateIncomeTax(employeeDetails.BasicPay);
             return netPay;
         }
     }
